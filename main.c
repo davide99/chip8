@@ -1,6 +1,5 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
-#include <fvec.h>
 #include "cpu.h"
 
 #define WINDOW_WIDTH 600
@@ -39,7 +38,7 @@ int main(int argc, char **argv) {
     SDL_DestroyWindow(window);
     SDL_Quit();*/
 
-    CPU cpu = cpuInit(result);
+    CPU cpu = cpuInit();
     SDL_Delay(1000);
 
     return 0;

@@ -19,4 +19,6 @@ typedef struct {
 
 Display dispInit();
 
+void dispClear(Display display);
+
 #endif
