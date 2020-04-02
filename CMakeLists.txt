@@ -3,6 +3,10 @@ project(chip8 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(chip8 main.c)
+add_executable(chip8 main.c memory.c memory.h cpu.h cpu.c display.c display.h sprite.c sprite.h chip8.c chip8.h)
 
-target_link_libraries(chip8 mingw32 SDL2main SDL2)
+if (WIN32)
+    target_link_libraries(chip8 mingw32 SDL2main SDL2)
+elseif (UNIX)
+    target_link_libraries(chip8 SDL2main SDL2)
+endif ()

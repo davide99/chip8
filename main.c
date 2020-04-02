@@ -1,36 +1,46 @@
-#include <stdio.h>
 #include <SDL2/SDL.h>
+#include <stdio.h>
+#include <fvec.h>
+#include "cpu.h"
+
+#define WINDOW_WIDTH 600
 
 int main(int argc, char **argv) {
-    SDL_Window *window;                    // Declare a pointer
+    /*SDL_Event event;
+    SDL_Renderer *renderer;
+    SDL_Window *window;
+    int i;
 
-    SDL_Init(SDL_INIT_VIDEO);              // Initialize SDL2
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_WIDTH, 0, &window, &renderer);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderClear(renderer);
 
-    // Create an application window with the following settings:
-    window = SDL_CreateWindow(
-            "An SDL2 window",                  // window title
-            SDL_WINDOWPOS_UNDEFINED,           // initial x position
-            SDL_WINDOWPOS_UNDEFINED,           // initial y position
-            640,                               // width, in pixels
-            480,                               // height, in pixels
-            SDL_WINDOW_OPENGL                  // flags - see below
-    );
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    for (i = 0; i < WINDOW_WIDTH; ++i)
+        SDL_RenderDrawPoint(renderer, i, i);
+    SDL_RenderPresent(renderer);
 
-    // Check that the window was successfully created
-    if (window == NULL) {
-        // In the case that the window could not be made...
-        printf("Could not create window: %s\n", SDL_GetError());
-        return 1;
+    while (1) {
+        if (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                break;
+            } else if(event.type == SDL_KEYDOWN){
+                switch(event.key.keysym.sym){
+                    case SDLK_0:
+                    case SDLK_KP_0:
+                        printf("0");
+                }
+            }
+        }
     }
 
-    // The window is open: could enter program loop here (see SDL_PollEvent())
-
-    SDL_Delay(3000);  // Pause execution for 3000 milliseconds, for example
-
-    // Close and destroy the window
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    SDL_Quit();*/
 
-    // Clean up
-    SDL_Quit();
+    CPU cpu = cpuInit(result);
+    SDL_Delay(1000);
+
     return 0;
 }
