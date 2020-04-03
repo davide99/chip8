@@ -16,10 +16,15 @@ typedef struct CPU_s {
 
         uint16_t PC; //Program Counter
         uint8_t SP; //Stack Pointer
-        uint16_t stack[16]; //Chip8 define a stack of exactly 16
     } regs;
+
+    uint16_t stack[16]; //Chip8 define a stack of exactly 16
 } CPU;
 
 CPU cpuInit();
+
+int DTthread(void *ptr);
+
+int STthread(void *ptr);
 
 #endif

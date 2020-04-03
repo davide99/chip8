@@ -3,7 +3,7 @@
 
 typedef struct CHIP8_s *CHIP8;
 
-CHIP8 chip8Init();
+CHIP8 chip8Init(const char *romFile);
 
 void chip8Free(CHIP8 chip8);
 

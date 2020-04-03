@@ -14,6 +14,8 @@ Memory memInit();
 
 uint16_t memReadWord(Memory mem, uint16_t address);
 
+void memCopyROMFromFile(Memory mem, const char *filename);
+
 void memFree(Memory mem);
 
 #endif

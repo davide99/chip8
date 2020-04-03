@@ -1,19 +1,14 @@
-#include <SDL2/SDL.h>
-#include <stdio.h>
-#include "cpu.h"
-
-#define WINDOW_WIDTH 600
+#include "chip8.h"
 
 int main(int argc, char **argv) {
     /*SDL_Event event;
-    SDL_Renderer *renderer;
-    SDL_Window *window;
-    int i;
+    -SDL_Renderer *renderer;
+    -SDL_Window *window;
 
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_WIDTH, 0, &window, &renderer);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-    SDL_RenderClear(renderer);
+    -SDL_Init(SDL_INIT_VIDEO);
+    -SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_WIDTH, 0, &window, &renderer);
+    -SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    -SDL_RenderClear(renderer);
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for (i = 0; i < WINDOW_WIDTH; ++i)
@@ -38,8 +33,7 @@ int main(int argc, char **argv) {
     SDL_DestroyWindow(window);
     SDL_Quit();*/
 
-    CPU cpu = cpuInit();
-    SDL_Delay(1000);
+    CHIP8 chip8 = chip8Init("rom.ch8");
 
     return 0;
 }
