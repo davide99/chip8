@@ -15,6 +15,7 @@
 
 typedef struct {
     uint8_t width, height;
+    uint16_t realWidth, realHeight;
     SDL_Renderer *renderer;
     SDL_Window *window;
     unsigned int **mat;

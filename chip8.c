@@ -15,6 +15,8 @@ struct CHIP8_s {
     Display display;
 };
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
 static void _execute(CHIP8 chip8) {
     uint16_t opcode, tmp;
     Sprite sprite;
@@ -103,7 +105,7 @@ static void _execute(CHIP8 chip8) {
 
                     case 6: //8xy6 - SHR Vx {, Vy}: Set Vx = Vx SHR 1
                         chip8->cpu.regs.VX[0xF] = chip8->cpu.regs.VX[opcode >> 8u & 0xFu] & 0x1;
-                        chip8->cpu.regs.VX[opcode >> 8u & 0xFu] /= 2;
+                        chip8->cpu.regs.VX[opcode >> 8u & 0xFu] >>= 1;
                         break;
 
                     case 7: //8xy7 - SUBN Vx, Vy: Set Vx = Vy - Vx, set VF = NOT borrow.
@@ -112,9 +114,9 @@ static void _execute(CHIP8 chip8) {
                         chip8->cpu.regs.VX[opcode >> 8u & 0xFu] -= chip8->cpu.regs.VX[opcode >> 4u & 0xFu];
                         break;
 
-                    case 8: //8xyE - SHL Vx {, Vy}: Set Vx = Vx SHL 1.
+                    case 0xE: //8xyE - SHL Vx {, Vy}: Set Vx = Vx SHL 1.
                         chip8->cpu.regs.VX[0xF] = chip8->cpu.regs.VX[opcode >> 8u & 0xFu] & 0x1;
-                        chip8->cpu.regs.VX[opcode >> 8u & 0xFu] *= 2;
+                        chip8->cpu.regs.VX[opcode >> 8u & 0xFu] <<= 1;
                         break;
                 }
                 break;
@@ -142,7 +144,7 @@ static void _execute(CHIP8 chip8) {
                 //Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
                 sprite = spriteReadFromMemory(chip8->memory.data + chip8->cpu.regs.I, opcode & 0xFu);
                 chip8->cpu.regs.VX[0xF] =
-                        dispDispSprite(chip8->display, sprite, opcode >> 8u & 0xFu, opcode >> 4u & 0xFu);
+                        dispDispSprite(chip8->display, sprite, chip8->cpu.regs.VX[opcode >> 8u & 0xFu], chip8->cpu.regs.VX[opcode >> 4u & 0xFu]);
                 break;
 
             case 0xE:
@@ -205,14 +207,14 @@ static void _execute(CHIP8 chip8) {
                     case 0x55:
                         //Fx55 - LD [I], Vx
                         //Store registers V0 through Vx in memory starting at location I.
-                        for (i = 0; i <= chip8->cpu.regs.VX[opcode >> 8u & 0xF]; i++)
+                        for (i = 0; i <= (opcode >> 8u & 0xF); i++)
                             chip8->memory.data[chip8->cpu.regs.I + i] = chip8->cpu.regs.VX[i];
                         break;
 
                     case 0x65:
                         //Fx65 - LD Vx, [I]
                         //Read registers V0 through Vx from memory starting at location I.
-                        for (i = 0; i <= chip8->cpu.regs.VX[opcode >> 8u & 0xF]; i++)
+                        for (i = 0; i <= (opcode >> 8u & 0xF); i++)
                             chip8->cpu.regs.VX[i] = chip8->memory.data[chip8->cpu.regs.I + i];
                         break;
                 }
@@ -222,10 +224,13 @@ static void _execute(CHIP8 chip8) {
         chip8->cpu.regs.PC += 2;
     }
 }
+#pragma clang diagnostic pop
 
 
 CHIP8 chip8Init(const char *romFile) {
     CHIP8 chip8 = malloc(sizeof(struct CHIP8_s));
+
+    SDL_Init(SDL_INIT_EVERYTHING); //TODO: Something better...
 
     chip8->cpu = cpuInit();
     chip8->memory = memInit();
@@ -235,8 +240,6 @@ CHIP8 chip8Init(const char *romFile) {
     srand(time(NULL));
 
     memCopyROMFromFile(chip8->memory, romFile);
-
-    SDL_Init(SDL_INIT_EVERYTHING); //TODO: Something better...
 
     _execute(chip8);
 
