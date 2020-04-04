@@ -18,5 +18,5 @@ Queue queueInit() {
     queue = malloc(sizeof(struct Queue_s));
 
     queue->head->item = NULL;
-    queue->head->next
+    //queue->head->next
 }

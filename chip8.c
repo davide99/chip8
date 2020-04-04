@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <SDL2/SDL.h>
-#include <utilapiset.h>
 
 struct CHIP8_s {
     CPU cpu;
@@ -227,7 +226,7 @@ static int _execute(CHIP8 chip8) {
         }
 
         chip8->cpu.regs.PC += 2;
-        SDL_Delay(1000.0 / 60);
+        //SDL_Delay(10);
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -237,7 +236,6 @@ static int _execute(CHIP8 chip8) {
                 switch (event.key.keysym.sym) {
                     case SDLK_0:
                     case SDLK_KP_0:
-                        Beep(440, 1000);
                         break;
                 }
             }
@@ -271,8 +269,11 @@ CHIP8 chip8Init(const char *romFile) {
 
     spriteGenCharInMemory(chip8->memory.data);
 
-    memCopyROMFromFile(chip8->memory, romFile);
-    _execute(chip8);
+    if (memCopyROMFromFile(chip8->memory, romFile)) {
+        showMessageBox("Error", "Error reading rom file", MB_ERROR);
+    } else {
+        _execute(chip8);
+    }
 
     return chip8;
 }

@@ -20,7 +20,7 @@ void memFree(Memory mem) {
     free(mem.data);
 }
 
-void memCopyROMFromFile(Memory mem, const char *filename) {
+int memCopyROMFromFile(Memory mem, const char *filename) {
     FILE *f;
     size_t size;
 
@@ -32,5 +32,8 @@ void memCopyROMFromFile(Memory mem, const char *filename) {
         fread(mem.data + ROM_LOAD_OFFSET, sizeof(uint8_t), size, f);
 
         fclose(f);
+        return 0;
     }
+
+    return 1;
 }

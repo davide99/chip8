@@ -22,10 +22,12 @@ Display dispInit() {
     for (i = 0; i < DISP_HEIGHT; i++)
         display.mat[i] = calloc(DISP_WIDTH, sizeof(int));
 
-    SDL_CreateWindowAndRenderer(display.winWidth, display.winHeight, 0, &display.window, &display.renderer);
-    SDL_RenderSetScale(display.renderer, SCALING_FACTOR, SCALING_FACTOR);
-    SDL_SetWindowPosition(display.window, 50, 50);
+    display.window = SDL_CreateWindow("", 50, 50, display.winWidth, display.winHeight, 0);
+    //SDL_CreateWindowAndRenderer(display.winWidth, display.winHeight, 0, &display.window, &display.renderer);
 
+    //SDL_SetWindowPosition(display.window, 50, 50);
+    display.renderer = SDL_CreateRenderer(display.window, -1, SDL_RENDERER_SOFTWARE);
+    SDL_RenderSetScale(display.renderer, SCALING_FACTOR, SCALING_FACTOR);
     dispClear(display);
 
     return display;

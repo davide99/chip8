@@ -1,6 +1,5 @@
 #include <SDL2/SDL.h>
 #include "eventsHandler.h"
-#include <windows.h>
 
 static int eventsThreadFn(void *ptr) {
     SDL_Event event;
@@ -15,7 +14,6 @@ static int eventsThreadFn(void *ptr) {
                 switch (event.key.keysym.sym) {
                     case SDLK_0:
                     case SDLK_KP_0:
-                        Beep(440, 1000);
                         eh->kbCallback(K0);
                         break;
                 }

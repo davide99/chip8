@@ -2,6 +2,7 @@
 #define CHIP8_UTILS_H
 
 #include <stdint.h>
+#include <SDL2/SDL.h>
 
 /*
  * Nibble extraction macros
@@ -25,6 +26,14 @@
 
 #define DWORD2RGBA(X) X>>24u, X >> 16u & 0xFFu, X >> 8u & 0xFFu, X & 0xFFu
 
+enum MbType {
+    MB_ERROR = SDL_MESSAGEBOX_ERROR,
+    MB_WARN = SDL_MESSAGEBOX_WARNING,
+    MB_INFO = SDL_MESSAGEBOX_INFORMATION
+};
+
 uint8_t randomUInt8();
+
+void showMessageBox(const char *title, const char *text, enum MbType type);
 
 #endif

@@ -10,3 +10,7 @@ uint8_t randomUInt8() {
 
     return v;
 }
+
+void showMessageBox(const char *title, const char *text, enum MbType type) {
+    SDL_ShowSimpleMessageBox(type, title, text, NULL);
+}
