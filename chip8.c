@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <SDL2/SDL.h>
+#include <utilapiset.h>
 
 struct CHIP8_s {
     CPU cpu;
@@ -23,11 +24,13 @@ static int _execute(CHIP8 chip8) {
     uint16_t opcode, tmp;
     Sprite sprite;
     uint8_t i;
+    SDL_Event event;
+    int shouldExit = 0;
 
-    while (1) {
+    while (!shouldExit) {
         opcode = memReadWord(chip8->memory, chip8->cpu.regs.PC);
 
-        switch (NIBBLE1(opcode)) { //MSB
+        switch (NIBBLE1(opcode)) {
             case 0x0:
                 switch (LOWEST12BIT(opcode)) {
                     case 0x0E0: //CLS: display clear
@@ -225,6 +228,20 @@ static int _execute(CHIP8 chip8) {
 
         chip8->cpu.regs.PC += 2;
         SDL_Delay(1000.0 / 60);
+
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                shouldExit = 1;
+                break;
+            } else if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_0:
+                    case SDLK_KP_0:
+                        Beep(440, 1000);
+                        break;
+                }
+            }
+        }
     }
 }
 
@@ -250,7 +267,7 @@ CHIP8 chip8Init(const char *romFile) {
     chip8->memory = memInit();
     chip8->display = dispInit();
 
-    EHInit(kbCallback, windowCallback);
+    //EHInit(kbCallback, windowCallback);
 
     spriteGenCharInMemory(chip8->memory.data);
 
