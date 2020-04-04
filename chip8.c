@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "display.h"
 #include "sprite.h"
-#include "keyboard.h"
+#include "eventsHandler.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
@@ -17,7 +17,8 @@ struct CHIP8_s {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
-static void _execute(CHIP8 chip8) {
+
+static int _execute(CHIP8 chip8) {
     uint16_t opcode, tmp;
     Sprite sprite;
     uint8_t i;
@@ -144,7 +145,8 @@ static void _execute(CHIP8 chip8) {
                 //Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
                 sprite = spriteReadFromMemory(chip8->memory.data + chip8->cpu.regs.I, opcode & 0xFu);
                 chip8->cpu.regs.VX[0xF] =
-                        dispDispSprite(chip8->display, sprite, chip8->cpu.regs.VX[opcode >> 8u & 0xFu], chip8->cpu.regs.VX[opcode >> 4u & 0xFu]);
+                        dispDispSprite(chip8->display, sprite, chip8->cpu.regs.VX[opcode >> 8u & 0xFu],
+                                       chip8->cpu.regs.VX[opcode >> 4u & 0xFu]);
                 break;
 
             case 0xE:
@@ -222,8 +224,10 @@ static void _execute(CHIP8 chip8) {
         }
 
         chip8->cpu.regs.PC += 2;
+        SDL_Delay(1000.0/60);
     }
 }
+
 #pragma clang diagnostic pop
 
 
@@ -240,12 +244,12 @@ CHIP8 chip8Init(const char *romFile) {
     srand(time(NULL));
 
     memCopyROMFromFile(chip8->memory, romFile);
-
     _execute(chip8);
 
     return chip8;
 }
 
 void chip8Free(CHIP8 chip8) {
+    dispFree(chip8->display);
     free(chip8);
 }

@@ -15,7 +15,7 @@
 
 typedef struct {
     uint8_t width, height;
-    uint16_t realWidth, realHeight;
+    uint16_t winWidth, winHeight;
     SDL_Renderer *renderer;
     SDL_Window *window;
     unsigned int **mat;
@@ -26,5 +26,7 @@ Display dispInit();
 void dispClear(Display display);
 
 uint8_t dispDispSprite(Display display, Sprite sprite, uint8_t x, uint8_t y);
+
+void dispFree(Display display);
 
 #endif

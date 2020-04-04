@@ -35,5 +35,6 @@ int main(int argc, char **argv) {
 
     CHIP8 chip8 = chip8Init("rom.ch8");
 
+
     return 0;
 }
