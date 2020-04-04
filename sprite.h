@@ -2,7 +2,6 @@
 #define CHIP8_SPRITE_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #define CHAR_SPRITES 16
 #define SPRITE_CHAR_HEIGHT 5

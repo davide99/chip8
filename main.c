@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     SDL_Quit();*/
 
     CHIP8 chip8 = chip8Init("rom.ch8");
-
+    chip8Free(chip8);
 
     return 0;
 }

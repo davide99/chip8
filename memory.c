@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define ROM_LOAD_OFFSET 0x200
-
 Memory memInit() {
     Memory memory = {
             .data = malloc(sizeof(uint8_t) * MEM_SIZE),
@@ -15,7 +13,7 @@ Memory memInit() {
 
 uint16_t memReadWord(Memory mem, uint16_t address) {
     //CHIP8 is Big Endian
-    return mem.data[address] << 8u | mem.data[address + 1];
+    return (uint16_t) (mem.data[address] << 8u) | (uint16_t) (mem.data[address + 1]);
 }
 
 void memFree(Memory mem) {

@@ -1,4 +1,5 @@
 #include "display.h"
+#include "utils.h"
 #include <stdlib.h>
 
 #define DISP_WIDTH 64
@@ -6,8 +7,6 @@
 #define SCALING_FACTOR 10
 #define BG_COLOR 0x0080FFFFu
 #define FG_COLOR 0xCCE0FFFFu
-
-#define GET_BIT(X, N) ( ( (X) >> (N) ) & 1 )
 
 Display dispInit() {
     uint8_t i;
@@ -35,16 +34,13 @@ Display dispInit() {
 uint8_t dispDispSprite(Display display, Sprite sprite, uint8_t x, uint8_t y) {
     //TODO: Dxyn
     unsigned int old;
-    uint8_t i, ret = 0;
-    int8_t a, b, j;
+    uint8_t i, j, ret = 0;
 
-    SDL_SetRenderDrawColor(display.renderer,
-                           FG_COLOR >> 24u, FG_COLOR >> 16u & 0xFFu, FG_COLOR >> 8u & 0xFFu, FG_COLOR & 0xFFu);
+    SDL_SetRenderDrawColor(display.renderer, DWORD2RGBA(FG_COLOR));
 
     for (i = 0; i < sprite.height; i++)
-        for (j = sprite.width - 1; j >= 0; j--)
-            if (GET_BIT(sprite.data[i], j)) {
-                //if (sprite.data[i] >> j & 1u) {
+        for (j = 0; j < sprite.width; j++)
+            if (GETNBIT(sprite.data[i], j)) {
                 old = display.mat[y + i][(x + j)];
                 display.mat[y + i][(x + j)] ^= 1u;
 
@@ -63,8 +59,7 @@ uint8_t dispDispSprite(Display display, Sprite sprite, uint8_t x, uint8_t y) {
 }
 
 void dispClear(Display display) {
-    SDL_SetRenderDrawColor(display.renderer,
-                           BG_COLOR >> 24u, BG_COLOR >> 16u & 0xFFu, BG_COLOR >> 8u & 0xFFu, BG_COLOR & 0xFFu);
+    SDL_SetRenderDrawColor(display.renderer, DWORD2RGBA(BG_COLOR));
     SDL_RenderClear(display.renderer);
 }
 

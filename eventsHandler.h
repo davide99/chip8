@@ -7,7 +7,7 @@ enum Key {
 };
 
 enum WinEvent{
-    QUIT
+    WIN_QUIT
 };
 
 typedef struct {

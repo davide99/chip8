@@ -4,10 +4,6 @@
 #include <stdint.h>
 #define V_REGISTERS 16
 
-enum Register {
-    V0 = 0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, VC, VD, VE, VF, DT, ST
-};
-
 typedef struct CPU_s {
     struct {
         uint8_t VX[V_REGISTERS]; //V0~VF registers
@@ -21,7 +17,7 @@ typedef struct CPU_s {
     uint16_t stack[16]; //Chip8 define a stack of exactly 16
 } CPU;
 
-CPU cpuInit();
+CPU cpuInit(uint16_t startingAddress);
 
 int DTthread(void *ptr);
 

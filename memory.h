@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define MEM_SIZE 4096
+#define ROM_LOAD_OFFSET 0x200
 
 typedef struct {
     uint8_t *data;

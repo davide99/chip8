@@ -2,7 +2,6 @@
 #include <SDL2/SDL.h>
 
 #define ONE_OVER_60_MS 1000.0/60
-#define PC_START_ADDR 0x200
 
 int DTthread(void *ptr) {
     CPU *cpu = ptr;
@@ -27,12 +26,12 @@ int STthread(void *ptr) {
     return 0;
 }
 
-CPU cpuInit() {
+CPU cpuInit(uint16_t startingAddress) {
     CPU cpu = {
             .regs = {
                     .ST=0,
                     .DT=0,
-                    .PC = PC_START_ADDR,
+                    .PC = startingAddress,
             },
     };
     return cpu;
