@@ -1,12 +1,6 @@
 #include "cpu.h"
 #include <SDL2/SDL.h>
 
-#ifdef WIN32
-
-#include <windows.h>
-
-#endif
-
 #define ONE_OVER_60_MS 1000.0/60
 
 int DTthread(void *ptr) {
@@ -22,15 +16,20 @@ int DTthread(void *ptr) {
 
 int STthread(void *ptr) {
     CPU *cpu = ptr;
+    SDL_AudioSpec wavSpec;
+    Uint32 wavLength;
+    Uint8 *wavBuffer;
+
+    SDL_LoadWAV("beep.wav", &wavSpec, &wavBuffer, &wavLength);
 
     while (cpu->regs.ST > 0) {
         cpu->regs.ST--;
         SDL_Delay(ONE_OVER_60_MS);
     }
 
-#ifdef WIN32
-    Beep(440, 1000);
-#endif
+    SDL_AudioDeviceID deviceId = SDL_OpenAudioDevice(NULL, 0, &wavSpec, NULL, 0);
+    SDL_QueueAudio(deviceId, wavBuffer, wavLength);
+    SDL_PauseAudioDevice(deviceId, 0);
 
     return 0;
 }

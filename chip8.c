@@ -17,9 +17,9 @@ struct CHIP8_s {
 };
 
 static int _execute(CHIP8 chip8) {
-    uint16_t opcode, tmp;
-    Sprite sprite;
     uint8_t i;
+    Sprite sprite;
+    uint16_t opcode;
     SDL_Event event;
     int shouldExit = 0;
 
@@ -92,10 +92,11 @@ static int _execute(CHIP8 chip8) {
                         break;
 
                     case 4: //8xy4 - ADD Vx, Vy: set Vx = Vx + Vy, set VF = carry
-                        tmp = chip8->cpu.regs.VX[NIBBLE2(opcode)] + chip8->cpu.regs.VX[NIBBLE3(opcode)];
+                        chip8->cpu.regs.VX[0xF] =
+                                ((uint16_t) chip8->cpu.regs.VX[NIBBLE2(opcode)] +
+                                 (uint16_t) chip8->cpu.regs.VX[NIBBLE3(opcode)]) > 255;
                         chip8->cpu.regs.VX[NIBBLE2(opcode)] += chip8->cpu.regs.VX[NIBBLE3(opcode)];
 
-                        chip8->cpu.regs.VX[0xF] = tmp > 255;
                         break;
 
                     case 5: //8xy5 - SUB Vx, Vy: set Vx = Vx-Vy, set VF = NOT borrow
