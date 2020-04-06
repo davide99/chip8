@@ -5,7 +5,7 @@
 
 #define CHAR_SPRITES 16
 #define SPRITE_CHAR_HEIGHT 5
-#define FIRST_CHAR_SPRITE_OFFSET 0
+#define FIRST_CHAR_SPRITE_OFFSET 0x050
 
 typedef struct {
     uint8_t *data;

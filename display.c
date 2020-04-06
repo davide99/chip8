@@ -23,10 +23,7 @@ Display dispInit() {
         display.mat[i] = calloc(DISP_WIDTH, sizeof(int));
 
     display.window = SDL_CreateWindow("", 50, 50, display.winWidth, display.winHeight, 0);
-    //SDL_CreateWindowAndRenderer(display.winWidth, display.winHeight, 0, &display.window, &display.renderer);
-
-    //SDL_SetWindowPosition(display.window, 50, 50);
-    display.renderer = SDL_CreateRenderer(display.window, -1, SDL_RENDERER_SOFTWARE);
+    display.renderer = SDL_CreateRenderer(display.window, -1, 0);
     SDL_RenderSetScale(display.renderer, SCALING_FACTOR, SCALING_FACTOR);
     dispClear(display);
 
@@ -34,26 +31,24 @@ Display dispInit() {
 }
 
 uint8_t dispDispSprite(Display display, Sprite sprite, uint8_t x, uint8_t y) {
-    //TODO: Dxyn
-    unsigned int old;
     uint8_t i, j, ret = 0;
 
-    SDL_SetRenderDrawColor(display.renderer, DWORD2RGBA(FG_COLOR));
-
     for (i = 0; i < sprite.height; i++)
-        for (j = 0; j < sprite.width; j++)
+        for (j = 0; j < sprite.width; j++) {
             if (GETNBIT(sprite.data[i], j)) {
-                old = display.mat[y + i][(x + j)];
-                display.mat[y + i][(x + j)] ^= 1u;
-
-                if (old && !display.mat[y + i][(x + j)])
+                if (display.mat[(y + i) % DISP_HEIGHT][(x + 7 - j) % DISP_WIDTH])
                     ret = 1;
 
-                //if (display.mat[y + i][(x + j)] && 1) {
-                SDL_RenderDrawPoint(display.renderer, (x + 7 - j) % DISP_WIDTH, (y + i));
-                //SDL_RenderPresent(display.renderer);
-                //}
+                display.mat[(y + i) % DISP_HEIGHT][(x + 7 - j) % DISP_WIDTH] ^= 1u;
+                if (display.mat[(y + i) % DISP_HEIGHT][(x + 7 - j) % DISP_WIDTH]) {
+                    SDL_SetRenderDrawColor(display.renderer, DWORD2RGBA(FG_COLOR));
+                } else {
+                    SDL_SetRenderDrawColor(display.renderer, DWORD2RGBA(BG_COLOR));
+                }
+
+                SDL_RenderDrawPoint(display.renderer, (x + 7 - j) % DISP_WIDTH, (y + i) % DISP_HEIGHT);
             }
+        }
 
     SDL_RenderPresent(display.renderer);
 
@@ -66,6 +61,7 @@ void dispClear(Display display) {
 }
 
 void dispFree(Display display) {
+    free(display.mat);
     SDL_DestroyRenderer(display.renderer);
     SDL_DestroyWindow(display.window);
 }

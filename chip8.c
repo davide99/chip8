@@ -3,9 +3,8 @@
 #include "memory.h"
 #include "display.h"
 #include "sprite.h"
-#include "eventsHandler.h"
 #include "utils.h"
-#include <stdio.h>
+#include "libs/KBQueue.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <SDL2/SDL.h>
@@ -14,10 +13,8 @@ struct CHIP8_s {
     CPU cpu;
     Memory memory;
     Display display;
+    KBQueue kbQueue;
 };
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
 
 static int _execute(CHIP8 chip8) {
     uint16_t opcode, tmp;
@@ -37,29 +34,29 @@ static int _execute(CHIP8 chip8) {
                         break;
 
                     case 0x0EE: //RET: return from a subroutine
-                        chip8->cpu.regs.PC = chip8->cpu.stack[chip8->cpu.regs.SP];
                         chip8->cpu.regs.SP--;
+                        chip8->cpu.regs.PC = chip8->cpu.stack[chip8->cpu.regs.SP];
                         break;
                 }
                 break;
 
-            case 0x1: //JP: jump @ address
+            case 0x1: //JP: 1nnn jump @ address
                 chip8->cpu.regs.PC = LOWEST12BIT(opcode) - 2;
                 break;
 
-            case 0x2: //CALL: call subroutine @ address
-                chip8->cpu.regs.SP++;
+            case 0x2: //CALL 2nnn: call subroutine @ address
                 chip8->cpu.stack[chip8->cpu.regs.SP] = chip8->cpu.regs.PC;
+                chip8->cpu.regs.SP++;
                 chip8->cpu.regs.PC = LOWEST12BIT(opcode) - 2;
                 break;
 
             case 0x3: //3xkk - SE Vx, byte: skip next instruction if Vx==kk
-                if (chip8->cpu.regs.VX[NIBBLE2(opcode)] == (LOWBYTE(opcode)))
+                if (chip8->cpu.regs.VX[NIBBLE2(opcode)] == LOWBYTE(opcode))
                     chip8->cpu.regs.PC += 2;
                 break;
 
             case 0x4: //4xkk - SNE Vx, byte: skip next instruction if Vx!=kk
-                if (chip8->cpu.regs.VX[NIBBLE2(opcode)] != (LOWBYTE(opcode)))
+                if (chip8->cpu.regs.VX[NIBBLE2(opcode)] != LOWBYTE(opcode))
                     chip8->cpu.regs.PC += 2;
                 break;
 
@@ -77,7 +74,7 @@ static int _execute(CHIP8 chip8) {
                 break;
 
             case 0x8:
-                switch (opcode & 0xFu) {
+                switch (NIBBLE4(opcode)) {
                     case 0: //8xy0 - LD Vx, Vy: set Vx=Vy
                         chip8->cpu.regs.VX[NIBBLE2(opcode)] = chip8->cpu.regs.VX[NIBBLE3(opcode)];
                         break;
@@ -156,15 +153,15 @@ static int _execute(CHIP8 chip8) {
                     case 0x9E:
                         //Ex9E - SKP Vx
                         //Skip next instruction if key with the value of Vx is pressed.
-                        if (chip8->cpu.regs.VX[NIBBLE2(opcode)] == K0)
-                            chip8->cpu.regs.PC += 2; //TODO: sistemare, sul down
+                        if (chip8->cpu.regs.VX[NIBBLE2(opcode)] == kbQueueDequeue(chip8->kbQueue))
+                            chip8->cpu.regs.PC += 2;
                         break;
 
                     case 0xA1:
                         //ExA1 - SKNP Vx
                         //Skip next instruction if key with the value of Vx is not pressed.
-                        if (chip8->cpu.regs.VX[NIBBLE2(opcode)] != K0)
-                            chip8->cpu.regs.PC += 2; //TODO: sistemare, sul down
+                        if (chip8->cpu.regs.VX[NIBBLE2(opcode)] != kbQueueDequeue(chip8->kbQueue))
+                            chip8->cpu.regs.PC += 2;
                         break;
                 }
                 break;
@@ -178,8 +175,10 @@ static int _execute(CHIP8 chip8) {
                     case 0x0A:
                         //Fx0A - LD Vx, K
                         //Wait for a key press, store the value of the key in Vx.
-                        //TODO: wait 'til any key is pressed  v--Key
-                        chip8->cpu.regs.VX[NIBBLE2(opcode)] = 0;
+                        if ((i = kbQueueDequeue(chip8->kbQueue)) == 255u)
+                            chip8->cpu.regs.PC -= 2;
+                        else
+                            chip8->cpu.regs.VX[NIBBLE2(opcode)] = i;
                         break;
 
                     case 0x15: //Fx15 - LD DT, Vx: Set delay timer = Vx.
@@ -197,7 +196,8 @@ static int _execute(CHIP8 chip8) {
                         break;
 
                     case 0x29: //Fx29 - LD F, Vx: Set I = location of sprite for digit Vx.
-                        chip8->cpu.regs.I = (NIBBLE2(opcode) * SPRITE_CHAR_HEIGHT) + FIRST_CHAR_SPRITE_OFFSET;
+                        chip8->cpu.regs.I =
+                                (chip8->cpu.regs.VX[NIBBLE2(opcode)] * SPRITE_CHAR_HEIGHT) + FIRST_CHAR_SPRITE_OFFSET;
                         break;
 
                     case 0x33:
@@ -213,6 +213,7 @@ static int _execute(CHIP8 chip8) {
                         //Store registers V0 through Vx in memory starting at location I.
                         for (i = 0; i <= NIBBLE2(opcode); i++)
                             chip8->memory.data[chip8->cpu.regs.I + i] = chip8->cpu.regs.VX[i];
+
                         break;
 
                     case 0x65:
@@ -220,52 +221,39 @@ static int _execute(CHIP8 chip8) {
                         //Read registers V0 through Vx from memory starting at location I.
                         for (i = 0; i <= NIBBLE2(opcode); i++)
                             chip8->cpu.regs.VX[i] = chip8->memory.data[chip8->cpu.regs.I + i];
+
                         break;
                 }
                 break;
         }
 
         chip8->cpu.regs.PC += 2;
-        //SDL_Delay(10);
+        SDL_Delay(1000 / 60);
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 shouldExit = 1;
                 break;
             } else if (event.type == SDL_KEYDOWN) {
-                switch (event.key.keysym.sym) {
-                    case SDLK_0:
-                    case SDLK_KP_0:
-                        break;
+                if ((event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9) ||
+                    (event.key.keysym.sym >= SDLK_a && event.key.keysym.sym <= SDLK_f)) {
+
+                    kbQueueEnqueue(chip8->kbQueue, KCODE2INT(event.key.keysym.sym));
                 }
             }
         }
     }
 }
 
-#pragma clang diagnostic pop
-
-void kbCallback(enum Key key) {
-    if (key == K0)
-        printf("k");
-}
-
-void windowCallback(enum WinEvent winEvent) {
-    if (winEvent == WIN_QUIT)
-        printf("quit");
-}
-
-
 CHIP8 chip8Init(const char *romFile) {
     CHIP8 chip8 = malloc(sizeof(struct CHIP8_s));
 
-    SDL_Init(SDL_INIT_EVERYTHING); //TODO: Something better...
+    SDL_Init(SDL_INIT_VIDEO); //TODO: Something better...
 
     chip8->cpu = cpuInit(ROM_LOAD_OFFSET);
     chip8->memory = memInit();
     chip8->display = dispInit();
-
-    //EHInit(kbCallback, windowCallback);
+    chip8->kbQueue = kbQueueInit();
 
     spriteGenCharInMemory(chip8->memory.data);
 
@@ -280,5 +268,8 @@ CHIP8 chip8Init(const char *romFile) {
 
 void chip8Free(CHIP8 chip8) {
     dispFree(chip8->display);
+    kbQueueFree(chip8->kbQueue);
+    memFree(chip8->memory);
+    SDL_Quit();
     free(chip8);
 }
